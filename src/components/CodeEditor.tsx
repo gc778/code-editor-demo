@@ -1,24 +1,27 @@
+import Editor from "@monaco-editor/react";
+
 interface CodeEditorProps {
   value: string;
   onChange: (next: string) => void;
+  language?: "javascript" | "typescript";
 }
 
-const CodeEditor = ({ value, onChange }: CodeEditorProps) => {
-  const lines = value.split("\n").length;
-  const lineNumbers = Array.from({ length: lines }, (_, i) => i + 1);
-
+const CodeEditor = ({ value, onChange, language = "javascript" }: CodeEditorProps) => {
   return (
-    <div className="flex h-full bg-[#1e1e1e]">
-      <div className="p-2 bg-[#252526] text-gray-500 text-sm font-mono select-none text-right">
-        {lineNumbers.map((num) => (
-          <div key={num}>{num}</div>
-        ))}
-      </div>
-      <textarea
-        className="flex-1 font-mono text-sm p-2 bg-[#1e1e1e] text-gray-200 border-none outline-none resize-none"
+    <div className="h-full w-full bg-[#1e1e1e]">
+      <Editor
+        height="100%"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        spellCheck="false"
+        defaultLanguage={language}
+        onChange={(val) => onChange(val ?? "")}
+        theme="vs-dark"
+        options={{
+          fontSize: 14,
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          wordWrap: "on",
+          automaticLayout: true, 
+        }}
       />
     </div>
   );
