@@ -1,5 +1,20 @@
 import React from "react";
 import { Play, RotateCcw, Code, Trophy, Check, ChevronDown } from "lucide-react";
+import type { Problem } from "../domain/types";
+
+interface HeaderProps {
+  problem: Problem;
+  isProblemSelectorOpen: boolean;
+  setIsProblemSelectorOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  problemSelectorRef: React.RefObject<HTMLDivElement | null>;
+  handleProblemChange: (id: number | string) => void;
+  currentProblemId: number;
+  PROBLEMS: ReadonlyArray<Problem>;
+  resetCode: () => void;
+  executeCode: (isSubmission: boolean) => void;
+  isRunning: boolean;
+  isSubmitting: boolean;
+}
 
 const Header = ({
   problem,
@@ -13,7 +28,7 @@ const Header = ({
   executeCode,
   isRunning,
   isSubmitting,
-}) => {
+}: HeaderProps) => {
   return (
     <header className="bg-white border-b px-4 py-2 shadow-sm flex items-center justify-between z-10">
       <div className="flex items-center gap-4">

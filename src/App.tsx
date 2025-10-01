@@ -1,40 +1,44 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Play, RotateCcw, Check, X, Clock, Code, Trophy, Lock, Unlock, ChevronDown } from "lucide-react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { Play, Clock } from "lucide-react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
-import { PROBLEMS } from "./components-and-resources/problems.jsx"; // Array of objects representing data related to each problem.
-import { workerCode } from "./components-and-resources/web-worker-init.jsx"; // Starting code for the webworker.
-import CustomConfetti from "./components-and-resources/component-confetti.jsx"; // Submition selebration effect.
-import CodeEditor from "./components-and-resources/component-code-editor.jsx"; // Code edditor component.
-import TestCase from "./components-and-resources/component-test-case.jsx"; // Test case components for rendering in the output window.
-import Header from "./components-and-resources/component-header.jsx"; // Header component.
-import LeftPanel from "./components-and-resources/component-left-panel.jsx"; // Left panel component which contains problem description, hints and solutions.
+import { PROBLEMS } from "./data/Problems.ts"; // Array of objects representing data related to each problem.
+import { workerCode } from "./worker/WebWorker.js"; // Starting code for the webworker.
+import CustomConfetti from "./components/CustomConfetti.js"; // Submition selebration effect.
+import CodeEditor from "./components/CodeEditor.js"; // Code edditor component.
+import TestCaseItem from "./components/TestCase.js"; // Test case component
+import Header from "./components/Header.js"; // Header component.
+import LeftPanel from "./components/LeftPanel.js"; // Left panel component which contains problem description, hints and solutions.
+import type { TestResult, WorkerMessage, TabName } from "./domain/types";
 
 const LeetCodeEditor = () => {
-  const [currentProblemId, setCurrentProblemId] = useState(1);
-  const [code, setCode] = useState("");
-  const [output, setOutput] = useState("");
-  const [testResults, setTestResults] = useState([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState("description");
-  const [solvedProblems, setSolvedProblems] = useState(new Set());
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [isProblemSelectorOpen, setIsProblemSelectorOpen] = useState(false);
+  const [currentProblemId, setCurrentProblemId] = useState<number>(PROBLEMS[0].id);
+  const [code, setCode] = useState<string>(PROBLEMS[0].starterCode);
+  const [output, setOutput] = useState<string>("");
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [activeTab, setActiveTab] = useState<TabName>("description");
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [showConfetti, setShowConfetti] = useState<boolean>(false);
+  const [isProblemSelectorOpen, setIsProblemSelectorOpen] = useState<boolean>(false);
+  const [solvedProblems, setSolvedProblems] = useState<Set<number>>(new Set());
 
-  const problem = useMemo(() => PROBLEMS.find((p) => p.id === currentProblemId), [currentProblemId]);
-  const problemSelectorRef = useRef(null);
+  const problemSelectorRef = useRef<HTMLDivElement | null>(null);
+
+  const problem = useMemo(
+    () => PROBLEMS.find((p) => p.id === currentProblemId) ?? PROBLEMS[0],
+    [currentProblemId]
+  );
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (problemSelectorRef.current && !problemSelectorRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (problemSelectorRef.current && !problemSelectorRef.current.contains(target)) {
         setIsProblemSelectorOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -44,7 +48,7 @@ const LeetCodeEditor = () => {
     setActiveTab("description");
   }, [problem]);
 
-  const handleProblemChange = (id) => {
+  const handleProblemChange = (id: number | string) => {
     setCurrentProblemId(Number(id));
   };
 
@@ -54,7 +58,7 @@ const LeetCodeEditor = () => {
     setTestResults([]);
   };
 
-  const executeCode = (isSubmission) => {
+  const executeCode = (isSubmission: boolean) => {
     setIsRunning(true);
     if (isSubmission) setIsSubmitting(true);
 
@@ -63,12 +67,13 @@ const LeetCodeEditor = () => {
 
     const worker = new Worker(URL.createObjectURL(new Blob([workerCode], { type: "application/javascript" })));
 
-    worker.onmessage = (event) => {
+    worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
       const { type, payload } = event.data;
       if (type === "progress" || type === "complete") {
-        setTestResults(payload.results);
-        const passedCount = payload.results.filter((r) => r.passed).length;
-        const totalCount = payload.results.length;
+        const results = payload.results as TestResult[];
+        setTestResults(results);
+        const passedCount = results.filter((r: TestResult) => r.passed).length;
+        const totalCount = results.length;
         setOutput(`${passedCount}/${totalCount} test cases passed.`);
 
         if (type === "complete") {
@@ -95,7 +100,7 @@ const LeetCodeEditor = () => {
       }
     };
 
-    worker.onerror = (error) => {
+    worker.onerror = (error: ErrorEvent) => {
       setOutput(`❌ Worker Error: ${error.message}`);
       setIsRunning(false);
       setIsSubmitting(false);
@@ -158,7 +163,7 @@ const LeetCodeEditor = () => {
                     <div>
                       <div className="p-3 mb-3 bg-gray-50 rounded text-sm font-semibold">{output}</div>
                       {problem.testCases.map((tc, i) => (
-                        <TestCase key={i} testCase={tc} result={testResults[i]} index={i} isRunning={isRunning} />
+                        <TestCaseItem key={i} testCase={tc} result={testResults[i]} index={i} isRunning={isRunning} />
                       ))}
                     </div>
                   ) : (

@@ -1,18 +1,34 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
-const CustomConfetti = ({ active }) => {
-  const canvasRef = useRef(null);
+export interface CustomConfettiProps {
+  active: boolean;
+}
+
+export type Particle = {
+  x: number;
+  y: number;
+  color: string;
+  size: number;
+  speedX: number;
+  speedY: number;
+};
+
+const CustomConfetti = ({ active }: CustomConfettiProps) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  
 
   useEffect(() => {
     if (active) {
       const canvas = canvasRef.current;
+      if (!canvas) return;
       const ctx = canvas.getContext("2d");
+      if (!ctx) return;
       let width = window.innerWidth;
       let height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
 
-      const particles = [];
+      const particles: Particle[] = [];
       const particleCount = 200;
       const colors = [
         "#f44336",
@@ -44,7 +60,7 @@ const CustomConfetti = ({ active }) => {
         });
       }
 
-      let animationFrameId;
+      let animationFrameId: number;
 
       const animate = () => {
         ctx.clearRect(0, 0, width, height);
@@ -69,7 +85,7 @@ const CustomConfetti = ({ active }) => {
 
       const timer = setTimeout(() => {
         cancelAnimationFrame(animationFrameId);
-      }, 5000); // Stop confetti after 5 seconds
+      }, 5000); 
 
       return () => {
         cancelAnimationFrame(animationFrameId);

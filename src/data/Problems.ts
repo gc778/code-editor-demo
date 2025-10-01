@@ -1,4 +1,6 @@
-export const PROBLEMS = [
+import type { Problem } from "../domain/types";
+
+export const PROBLEMS : Problem[] = [
   {
     id: 1,
     title: "1. Two Sum",

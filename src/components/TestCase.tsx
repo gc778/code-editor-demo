@@ -1,7 +1,14 @@
-import React from "react";
 import { Check, X, Clock } from "lucide-react";
+import type { TestCase, TestResult } from "../domain/types";
 
-const TestCase = ({ testCase, result, index, isRunning }) => {
+interface TestCaseProps {
+  testCase: TestCase;
+  result?: TestResult;   // may be undefined while running
+  index: number;
+  isRunning: boolean;
+}
+
+const TestCaseItem = ({ testCase, result, index, isRunning }: TestCaseProps) => {
   const getStatusIcon = () => {
     if (isRunning && !result) return <Clock className="w-4 h-4 text-yellow-500 animate-spin" />;
     if (!result) return <Clock className="w-4 h-4 text-gray-400" />;
@@ -37,4 +44,4 @@ const TestCase = ({ testCase, result, index, isRunning }) => {
   );
 };
 
-export default TestCase;
+export default TestCaseItem;

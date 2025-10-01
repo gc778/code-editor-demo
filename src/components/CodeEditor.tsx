@@ -1,6 +1,9 @@
-import React from "react";
+interface CodeEditorProps {
+  value: string;
+  onChange: (next: string) => void;
+}
 
-const CodeEditor = ({ value, onChange }) => {
+const CodeEditor = ({ value, onChange }: CodeEditorProps) => {
   const lines = value.split("\n").length;
   const lineNumbers = Array.from({ length: lines }, (_, i) => i + 1);
 
