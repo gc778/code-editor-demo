@@ -1,11 +1,13 @@
-import React from "react";
 import { Lock, Unlock } from "lucide-react";
+import type { LeftPanelProps, TabName } from "../domain/types";
 
-const LeftPanel = ({ problem, activeTab, setActiveTab, solvedProblems }) => {
+const TABS: TabName[] = ["description", "hints", "solutions"];
+
+const LeftPanel = ({ problem, activeTab, setActiveTab, solvedProblems } : LeftPanelProps)  => {
   return (
     <div className="h-full flex flex-col bg-white">
       <div className="border-b">
-        {["description", "hints", "solutions"].map((tab) => (
+        {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
