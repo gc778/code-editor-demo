@@ -146,7 +146,7 @@ const LeetCodeEditor = () => {
               <div className="h-full flex flex-col bg-[#1e1e1e]">
                 <div className="bg-gray-800 text-white px-4 py-2 text-sm font-semibold border-b border-gray-700">JavaScript</div>
                 <div className="flex-1 overflow-hidden">
-                  <CodeEditor value={code} onChange={setCode} />
+                <CodeEditor value={code} onChange={setCode} language="javascript" />
                 </div>
               </div>
             </Panel>
